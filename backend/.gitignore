@@ -1,0 +1,29 @@
+
+# Python virtual environments
+venv/
+backend/venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Environment variables
+.env
+
+# Uploaded documents
+uploads/
+backend/uploads/
+
+# Duplicate detection
+document_hashes.json
+
+# ChromaDB data (if you use persistent storage later)
+chroma/
+chromadb/
+
+# VS Code
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db

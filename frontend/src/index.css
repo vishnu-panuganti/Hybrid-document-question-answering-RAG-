@@ -1,0 +1,80 @@
+@import "tailwindcss";
+
+
+.app-container{
+    display:flex;
+    min-height:100vh;
+}
+
+
+.sidebar{
+    width:280px;
+    height:100vh;
+
+    padding:20px;
+
+    border-right:1px solid #d1d5db;
+
+    position:fixed;
+    top:0;
+    left:0;
+
+    background-color:white;
+}
+
+
+.main-content{
+    flex:1;
+    margin-left:280px;
+}
+
+
+.new-chat-btn{
+    width:100%;
+
+    padding:12px;
+
+    margin-top:20px;
+
+    border:none;
+    border-radius:10px;
+
+    cursor:pointer;
+
+    font-size:16px;
+    font-weight:600;
+}
+
+
+.sidebar h1{
+    font-size:28px;
+    font-weight:bold;
+}
+
+
+.sidebar h2{
+    margin-top:20px;
+    font-size:20px;
+    font-weight:600;
+}
+
+
+.sidebar hr{
+    margin-top:20px;
+}
+
+
+.chat-section{
+    margin-top:15px;
+}
+
+
+.pdf-section{
+    margin-top:15px;
+}
+
+
+.sidebar p{
+    font-size:14px;
+    color:gray;
+}
