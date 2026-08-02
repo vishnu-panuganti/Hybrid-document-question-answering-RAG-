@@ -2,7 +2,7 @@ from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from pdf_reader import extract_text_from_pdf
+from readers.pdf_reader import extract_text_from_pdf
 from chunker import split_text_into_chunks
 from embeddings import get_embedding, generate_answer
 from vector_store import store_chunks, search_chunks
@@ -10,7 +10,7 @@ from bm25_search import build_bm25_index, search_bm25
 from hybrid_search import reciprocal_rank_fusion
 from reranker import rerank_chunks
 import time
-from text_reader import extract_text_from_txt
+from readers.text_reader import extract_text_from_txt
 from duplicate_checker import (
     calculate_file_hash,
     is_duplicate,
@@ -18,6 +18,7 @@ from duplicate_checker import (
     get_existing_document,
     load_hashes
 )
+from readers.docx_reader import extract_text_from_docx
  
 
 import uuid
@@ -91,17 +92,18 @@ def upload_pdf(file: UploadFile = File(...)):
             "filename": existing["filename"]
         }    
 
-    if if file_type == "pdf":
-    extracted_text = extract_text_from_pdf(file_path)
+    if file_type == "pdf":
+        extracted_text = extract_text_from_pdf(file_path)
 
-elif file_type == "txt":
-    extracted_text = extract_text_from_txt(file_path)
+    elif file_type == "txt":
+        extracted_text = extract_text_from_txt(file_path)
 
+    elif file_type == "docx":
+        extracted_text = extract_text_from_docx(file_path)
 
-
-else:
-    return {
-        "error": f"Unsupported file type: {file_type}"
+    else:
+        return {
+            "error": f"Unsupported file type: {file_type}"
     }
 
     # Split extracted text into chunks
