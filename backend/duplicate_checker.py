@@ -38,7 +38,18 @@ def is_duplicate(file_hash):
 
 
 def register_document(file_hash, document_id, filename):
+    print("Registering:", filename)
+
     hashes = load_hashes()
+
+    hashes[file_hash] = {
+        "document_id": document_id,
+        "filename": filename
+    }
+
+    save_hashes(hashes)
+
+    print(load_hashes())
 
     hashes[file_hash] = {
         "document_id": document_id,
