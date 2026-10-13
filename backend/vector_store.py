@@ -6,7 +6,15 @@ client = chromadb.PersistentClient(path="./chroma_db")
 collection = client.get_or_create_collection(
     name="document_chunks"
 )
+print("Chroma document count:", collection.count())
+data = collection.get(
+    include=["documents", "metadatas"]
+)
 
+for doc, metadata in zip(data["documents"], data["metadatas"]):
+    print("FILE:", metadata["filename"])
+    print("TEXT:", doc[:300])
+    print("----------------")
 
 def store_chunks(chunks, embeddings, document_id, filename, file_type):
 
@@ -63,3 +71,32 @@ def search_chunks(question_embedding):
         })
 
     return relevant_chunks
+
+
+# =====================================
+# Get all chunks from Chroma
+# =====================================
+
+def get_all_chunks():
+
+    data = collection.get(
+        include=["documents", "metadatas"]
+    )
+
+    chunks = []
+
+    for document, metadata in zip(
+        data["documents"],
+        data["metadatas"]
+    ):
+
+        chunks.append({
+            "chunk_id": metadata["chunk_id"],
+            "document_id": metadata["document_id"],
+            "filename": metadata["filename"],
+            "file_type": metadata["file_type"],
+            "page": metadata.get("page", 0),
+            "text": document
+        })
+
+    return chunks

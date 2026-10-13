@@ -2,20 +2,21 @@ import pandas as pd
 
 
 def extract_text_from_csv(file_path):
+
     df = pd.read_csv(file_path)
 
-    rows = []
+    chunks = []
 
-    for _, row in df.iterrows():
-        rows.append(
-            ", ".join(f"{col}: {row[col]}" for col in df.columns)
+    for index, row in df.iterrows():
+
+        row_text = ", ".join(
+            f"{column}: {row[column]}"
+            for column in df.columns
         )
 
-    text = "\n".join(rows)
+        chunks.append({
+            "page": index + 1,
+            "text": row_text
+        })
 
-    return [
-        {
-            "page": 1,
-            "text": text
-        }
-    ] 
+    return chunks

@@ -76,7 +76,7 @@ def home():
 # =====================================
 
 @app.post("/upload")
-def upload_pdf(file: UploadFile = File(...)):
+def upload_document(file: UploadFile = File(...)):
 
     try:
 
@@ -90,27 +90,51 @@ def upload_pdf(file: UploadFile = File(...)):
         # Get file type
         # ---------------------------------
 
-        file_extension = os.path.splitext(file.filename)[1].lower()
-        file_type = file_extension.replace(".", "")
+        file_extension = os.path.splitext(
+            file.filename
+        )[1].lower()
 
-        file_path = f"uploads/{file.filename}"
+        file_type = file_extension.replace(".", "")
 
         # ---------------------------------
         # Save uploaded file
         # ---------------------------------
 
+        os.makedirs("uploads", exist_ok=True)
+
+        file_path = os.path.join(
+            "uploads",
+            file.filename
+        )
+
         with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
+            shutil.copyfileobj(
+                file.file,
+                buffer
+            )
 
         # ---------------------------------
         # Calculate file hash
         # ---------------------------------
 
-        file_hash = calculate_file_hash(file_path)
+        file_hash = calculate_file_hash(
+            file_path
+        )
 
-        print("Current Hash:", file_hash)
-        print("Hashes:", load_hashes())
-        print("Duplicate:", is_duplicate(file_hash))
+        print(
+            "Current Hash:",
+            file_hash
+        )
+
+        print(
+            "Hashes:",
+            load_hashes()
+        )
+
+        print(
+            "Duplicate:",
+            is_duplicate(file_hash)
+        )
 
         # ---------------------------------
         # Duplicate check
@@ -118,7 +142,9 @@ def upload_pdf(file: UploadFile = File(...)):
 
         if is_duplicate(file_hash):
 
-            existing = get_existing_document(file_hash)
+            existing = get_existing_document(
+                file_hash
+            )
 
             return {
                 "message": "Document already uploaded.",
@@ -165,14 +191,43 @@ def upload_pdf(file: UploadFile = File(...)):
         # Split text into chunks
         # ---------------------------------
 
-        chunks = split_text_into_chunks(
-            extracted_text
-        )
+        if file_type == "csv":
+
+            # CSV reader already returns
+            # one chunk per row.
+            #
+            # DO NOT pass CSV data through
+            # the generic text chunker.
+
+            chunks = extracted_text
+
+        else:
+
+            # PDF, TXT and DOCX use
+            # the normal text chunker.
+
+            chunks = split_text_into_chunks(
+                extracted_text
+            )
 
         print(
             "Number of chunks:",
             len(chunks)
         )
+
+        # ---------------------------------
+        # Print chunks for debugging
+        # ---------------------------------
+
+        for i, chunk in enumerate(chunks):
+
+            print(
+                f"\nCHUNK {i + 1}:"
+            )
+
+            print(
+                chunk["text"][:300]
+            )
 
         # ---------------------------------
         # Build BM25 index
@@ -197,7 +252,9 @@ def upload_pdf(file: UploadFile = File(...)):
                 chunk["text"]
             )
 
-            embeddings.append(embedding)
+            embeddings.append(
+                embedding
+            )
 
         # ---------------------------------
         # Store chunks in ChromaDB
@@ -267,6 +324,7 @@ GREETINGS = {
 def ask_question(request: QuestionRequest):
 
     question = request.question
+
     user_question = question.strip().lower()
 
     # ---------------------------------
@@ -328,7 +386,14 @@ def ask_question(request: QuestionRequest):
             question_embedding
         )
 
-        print("\nDENSE SEARCH CHUNKS:")
+        print(
+            "\nDENSE SEARCH CHUNKS:"
+        )
+
+        print(
+            "Dense chunks:",
+            len(relevant_chunks)
+        )
 
         for chunk in relevant_chunks:
 
@@ -351,7 +416,14 @@ def ask_question(request: QuestionRequest):
             question
         )
 
-        print("\nBM25 SEARCH RESULTS:")
+        print(
+            "\nBM25 SEARCH RESULTS:"
+        )
+
+        print(
+            "BM25 chunks:",
+            len(bm25_chunks)
+        )
 
         for chunk in bm25_chunks:
 
@@ -364,8 +436,13 @@ def ask_question(request: QuestionRequest):
                 chunk["bm25_score"]
             )
 
-        print("\nQuestion:")
-        print(question)
+        print(
+            "\nQuestion:"
+        )
+
+        print(
+            question
+        )
 
         # =================================
         # Hybrid Search - RRF
@@ -376,7 +453,14 @@ def ask_question(request: QuestionRequest):
             bm25_chunks
         )
 
-        print("\nHYBRID RRF RESULTS:")
+        print(
+            "\nHYBRID RRF RESULTS:"
+        )
+
+        print(
+            "Hybrid chunks:",
+            len(hybrid_chunks)
+        )
 
         for chunk in hybrid_chunks:
 
@@ -392,9 +476,6 @@ def ask_question(request: QuestionRequest):
         # =================================
         # BGE Reranking
         # =================================
-
-        # Send strongest RRF candidates
-        # to BGE reranker
 
         rerank_candidates = hybrid_chunks[:8]
 
@@ -412,7 +493,14 @@ def ask_question(request: QuestionRequest):
             f"\nBGE RERANK TIME: {elapsed:.2f} seconds"
         )
 
-        print("\nBGE RERANKED RESULTS:")
+        print(
+            "\nBGE RERANKED RESULTS:"
+        )
+
+        print(
+            "Reranked chunks:",
+            len(final_chunks)
+        )
 
         for chunk in final_chunks:
 
@@ -454,7 +542,9 @@ def ask_question(request: QuestionRequest):
 
             if source not in sources:
 
-                sources.append(source)
+                sources.append(
+                    source
+                )
 
         # =================================
         # Final Response

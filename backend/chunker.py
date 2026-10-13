@@ -1,33 +1,35 @@
-def split_text_into_chunks(pages, chunk_size=1500, overlap=300):
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+
+def split_text_into_chunks(pages, chunk_size=300, overlap=50):
     chunks = []
+
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=chunk_size,
+        chunk_overlap=overlap,
+        separators=[
+            "\n\n",
+            "\n",
+            ". ",
+            " ",
+            ""
+        ]
+    )
 
     for page_data in pages:
         page_number = page_data["page"]
         text = page_data["text"].strip()
 
-        # Skip empty pages
         if not text:
             continue
 
-        start = 0
+        split_chunks = splitter.split_text(text)
 
-        while start < len(text):
-            end = min(start + chunk_size, len(text))
-
-            chunk_text = text[start:end].strip()
-
-            # Avoid storing tiny useless chunks
-            if len(chunk_text) >= 100:
+        for chunk_text in split_chunks:
+            if len(chunk_text.strip()) >= 100:
                 chunks.append({
-                    "text": chunk_text,
+                    "text": chunk_text.strip(),
                     "page": page_number
                 })
-
-            # Reached the end of the page
-            if end == len(text):
-                break
-
-            # Move forward but preserve overlap
-            start = end - overlap
 
     return chunks

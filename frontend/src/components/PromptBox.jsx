@@ -144,11 +144,12 @@ const [isLoading, setIsLoading] = useState(false);
             }
         );
 
-        const aiConversation = {
-            role: "assistant",
-            message: response.data.answer,
-            documents: []
-        };
+      const aiConversation = {
+        role: "assistant",
+        message: response.data.answer,
+        documents: [],
+        sources: response.data.sources || []
+};
 
         const finalChat = {
             ...updatedChat,
